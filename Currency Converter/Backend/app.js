@@ -3,6 +3,9 @@ require("dotenv").config({ path: `.env.${ENV}` });
 
 const express = require("express");
 
+//external modules
+const cors = require("cors");
+
 // Local modules
 const errorController = require("./controllers/errorController");
 const exchangeRouter = require("./routers/exchangeRouter");
@@ -11,8 +14,10 @@ const exchangeRateService = require("./service/exchangeRateService");
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 // Test route (IMPORTANT)
 app.get("/test", (req, res) => {
