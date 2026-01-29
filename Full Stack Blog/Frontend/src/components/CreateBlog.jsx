@@ -1,9 +1,13 @@
-import { useRef } from "react";
+import { use, useContext, useRef } from "react";
+import {useNavigate} from "react-router-dom";
+import { BlogContext } from "../store/BlogContext";
 
 const CreateBlog = () => {
+  const {addBlog} = useContext(BlogContext);
   const titleRef = useRef();
   const contentRef = useRef();
   const authorRef = useRef();
+  const navigate = useNavigate();
 
   const handleCreateBlog = async (e) => {
     e.preventDefault();
@@ -24,15 +28,16 @@ const CreateBlog = () => {
     })
       .then((res) => res.json())
       .then((resJson) => {
-        console.log(resJson.blog);
+        addBlog(resJson.blog);
         titleRef.current.value = "";
         contentRef.current.value = "";
         authorRef.current.value = "";
+       navigate("/");
       });
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-tr from-slate-100 to-slate-300 py-10">
+    <div className="flex flex-col items-center justify-center min-h-screen  to-slate-300 py-10">
       <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-8">
         <h2 className="text-2xl font-bold mb-5 text-center text-slate-800">
           ✍️ Share Your Blog Post!

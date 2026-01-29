@@ -1,8 +1,14 @@
+import BlogList from "./BlogList"
+import BlogLoader from "./BlogLoader"
 
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <BlogLoader>
+      <BlogList>
+        
+      </BlogList>
+    </BlogLoader>
   )
 }
 
