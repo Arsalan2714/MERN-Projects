@@ -1,20 +1,20 @@
-import { Children, createContext, useReducer } from "react";
+import { createContext, useCallback, useReducer } from "react";
 import BlogReducer from "./BlogReducer";
 
 
 export const BlogContext = createContext();
-export const BlogProvider = ({ Children}) => {
+export const BlogProvider = ({ children }) => {
 
     const [blogs, dispatch ] = useReducer(BlogReducer, []);
 
-    const setBlogs = (blogs) => {
+    const setBlogs = useCallback((blogs) => {
         dispatch({
             type: 'SET_BLOGS',
             payload:{
                 blogs
             }
         })
-    };
+    }, []);
 
     const addBlog = (blog) => {
         dispatch({
@@ -50,7 +50,7 @@ export const BlogProvider = ({ Children}) => {
 
 return ( 
     <BlogContext.Provider value={{blogs, addBlog, setBlogs, deleteBlog, updateBlog}}>
-        {Children}
+        {children}
     </BlogContext.Provider> 
 )
 

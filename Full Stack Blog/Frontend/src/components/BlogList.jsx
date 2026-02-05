@@ -1,8 +1,14 @@
+import { useContext } from "react";
+import { BlogContext } from "../store/BlogContext"
+import Blog from "./Blog";
 
 
 const BlogList = () => {
+  const {blogs} = useContext(BlogContext);
   return (
-    <div>BlogList</div>
+    <div>{(blogs ?? []).map((blog)=> (<Blog key={blog._id} blog={blog}/>
+    ))}
+    </div>
   )
 }
 
