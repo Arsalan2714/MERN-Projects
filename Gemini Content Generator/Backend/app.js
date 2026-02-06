@@ -9,7 +9,7 @@ const bodyParser = require("body-parser");
 
 // Local modules
 const errorController = require("./controllers/errorController");
-const blogRouter = require("./routers/blogRouter");
+const conversationRouter = require("./routers/conversationRouter");
 
 const MONGO_DB_URL = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@airbnb.zr7xw53.mongodb.net/${process.env.MONGO_DB_DATABASE}`;
 
@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // API routes
-app.use("/api", blogRouter);
+app.use("/api", conversationRouter);
 
 // 404 handler
 app.use(errorController.get404);
