@@ -9,16 +9,16 @@ const NavBar = () => {
   ];
 
   return (
-    <nav className="bg-blue-700 drop-shadow-lg py-4 px-6 flex items-center justify-between">
+    <nav className="bg-blue-700 drop-shadow-lg py-4 px-8 flex items-center justify-between">
       <div className="text-2xl font-bold tracking-wide text-slate-50 select-none">
         <span className="hover:text-blue-200 transition-colors">Full Stack Blog</span>
       </div>
-      <ul className="flex gap-8">
+      <ul className="flex items-center gap-6">
         {navLinks.map((link) => (
           <li key={link.path}>
             <Link
               to={link.path}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              className={`px-4 py-2 rounded-md font-medium transition-colors whitespace-nowrap ${
                 location.pathname === link.path
                   ? "bg-blue-900 text-white shadow-sm"
                   : "text-blue-100 hover:bg-blue-800 hover:text-white"

@@ -80,7 +80,7 @@ const Blog = ({ blog }) => {
             <p className="text-slate-500 italic">No comments yet. Be the first!</p>
           )}
         </div>
-        <CommentForm />
+        <CommentForm blogId={blog._id} />
       </div>
     </div>
   );

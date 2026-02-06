@@ -1,5 +1,39 @@
+import { useContext, useRef, useState } from "react";
+import { BlogContext } from "../store/BlogContext";
 
-const CommentForm = () => {
+const CommentForm = ({blogId}) => {
+  const { blog, updateBlog } = useContext(BlogContext);
+  const [commenting, sendingCommenting ]=useState(false);
+
+  const usernameRef = useRef(null);
+  const commentRef = useRef(null);
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    sendingCommenting(true);
+     fetch(`http://localhost:3001/api/blogs/${blogId}/comment`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: usernameRef.current.value,
+        content: commentRef.current.value,
+      })
+    })
+      .then((res) => res.json())
+      .then((resJson) => {
+        updateBlog(resJson.blog);
+      })
+      .finally(() => {
+        sendingCommenting(false);
+        usernameRef.current.value = "";
+        commentRef.current.value = "";
+
+      })
+  }
+
   return (
     <form
       className="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-md w-full"
@@ -12,7 +46,7 @@ const CommentForm = () => {
         <input
           type="text"
           placeholder="Enter your name"
-          className="mt-2 px-4 py-2 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          className="mt-2 px-4 py-2 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" ref={usernameRef}
         />
       </label>
       <label className="flex flex-col text-slate-700 font-medium">
@@ -20,14 +54,14 @@ const CommentForm = () => {
         <textarea
           placeholder="Share your thoughts..."
           rows={4}
-          className="mt-2 px-4 py-2 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none"
+          className="mt-2 px-4 py-2 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none" ref={commentRef}
         />
       </label>
       <button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition active:scale-95 mt-2 tracking-wide w-fit"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition active:scale-95 mt-2 tracking-wide w-fit" onClick={handleSubmit}
       >
-        Post Comment
+        {commenting ? "Posting..." : "Post Comment"}
       </button>
     </form>
   );
