@@ -10,6 +10,11 @@ const SYSTEM_PROMPT = {
     content: "Behave like a programming teacher and your answers should be simple and concise "
 }
 
+const TITLE_PROMPT = {
+    role: "system",
+    content: "Generate a short title for the following conversation in no more than 5 words."
+}
+
 const createMessageString = (messages) => {
   return messages.map(msg => `${msg.role}: ${msg.content}`).join("\n");
 } 
@@ -31,3 +36,19 @@ export async function generateContent(prompt, model = "gemini-3-flash-preview", 
     throw error; // let controller handle response
   }
 }
+
+const generateTitle = async (messages)=>{
+  const finalPrompt = createMessageString([TITLE_PROMPT,...messages]) + "\n Generate a short title for the above conversation.";
+  try{
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: finalPrompt
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Gemini API error:", error.message);
+    throw error; // let controller handle response
+  }
+}
+
+export { generateTitle };
