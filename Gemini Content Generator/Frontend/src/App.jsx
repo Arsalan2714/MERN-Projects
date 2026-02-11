@@ -10,11 +10,12 @@ function App() {
     
    <BrowserRouter>
    <ChatProvider>
-  <div className="min-h-screen bg-gray-100 py-8">
+  <div className="min-h-screen bg-gray-100">
     <Routes>
-      <Route path="/" element={<ChatLayout />} />
-      <Route path="/" element={<Chat />} />
-      <Route path="/conversation/:id" element={<Chat />} />
+      <Route path="/" element={<ChatLayout />}>
+        <Route index element={<Chat />} />
+        <Route path="conversation/:id" element={<Chat />} />
+      </Route>
     </Routes>
   </div>
   </ChatProvider>

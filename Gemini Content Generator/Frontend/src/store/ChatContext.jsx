@@ -27,8 +27,8 @@ export const ChatProvider = ({ children }) => {
     const deleteChat = (id) => {
         setChats(chats.filter(chat => chat._id !== id));
     };
-    const updateChat = (id, updateChatObj) => {
-        setChats(chats.map(chat => chat._id === id ? updateChatObj : chat)); 
+    const updateChat = (updateChat) => {
+        setChats(chats.map(chat => chat._id ===  updateChat._id ? updateChat : chat)); 
     };
 
     return (
