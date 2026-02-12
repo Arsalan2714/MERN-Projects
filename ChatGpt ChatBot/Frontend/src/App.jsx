@@ -1,26 +1,16 @@
-
-import { BrowserRouter, Route, Routes} from "react-router-dom"
-import ChatLayout from "./layout/ChatLayout";
 import Chat from "./components/Chat";
-import { ChatProvider } from "./store/ChatContext";
-
 
 function App() {
   return (
-    
-   <BrowserRouter>
-   <ChatProvider>
-  <div className="min-h-screen bg-gray-100">
-    <Routes>
-      <Route path="/" element={<ChatLayout />}>
-        <Route index element={<Chat />} />
-        <Route path="conversation/:id" element={<Chat />} />
-      </Route>
-    </Routes>
-  </div>
-  </ChatProvider>
-    </BrowserRouter>
-    
+    <div className="h-screen bg-[#0f172a] text-white flex flex-col">
+      <header className="py-4 border-b border-gray-800 text-center text-xl font-semibold tracking-wide">
+        🤖 AI Chatbot
+      </header>
+
+      <div className="flex-1 overflow-hidden">
+        <Chat />
+      </div>
+    </div>
   );
 }
 
