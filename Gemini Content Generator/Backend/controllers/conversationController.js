@@ -19,8 +19,16 @@ exports.newConversation = async (req, res, next) => {
     const content = await generateContent(prompt, model);
 
     const messages = [
-      { role: "user", content: prompt },
-      { role: "assistant", content: content }
+      { 
+        role: "user", 
+        content: prompt,
+        timestamp: new Date()  // ← ADD THIS
+      },
+      { 
+        role: "assistant", 
+        content: content,
+        timestamp: new Date()  // ← ADD THIS
+      }
     ];
 
     const title = await generateTitle(messages);
@@ -35,6 +43,7 @@ exports.newConversation = async (req, res, next) => {
 
     res.status(201).json(conversation);
   } catch (error) {
+    console.error("Error creating conversation:", error);  // ← Better error logging
     res.status(500).json({ message: "Failed to create conversation" });
   }
 };
@@ -46,7 +55,6 @@ exports.newMessage = async (req, res, next) => {
 
     const conversation = await Conversation.findById(id); 
 
-
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found" });
     }
@@ -57,13 +65,23 @@ exports.newMessage = async (req, res, next) => {
       conversation.messages
     );
 
-    conversation.messages.push({ role: "user", content: prompt });
-    conversation.messages.push({ role: "assistant", content });
+    conversation.messages.push({ 
+      role: "user", 
+      content: prompt,
+      timestamp: new Date()  // ← ADD THIS
+    });
+    
+    conversation.messages.push({ 
+      role: "assistant", 
+      content,
+      timestamp: new Date()  // ← ADD THIS
+    });
 
     await conversation.save();
 
     res.json(conversation);
   } catch (error) {
+    console.error("Error adding message:", error);  // ← Better error logging
     res.status(500).json({ message: "Failed to add message" });
   }
 };

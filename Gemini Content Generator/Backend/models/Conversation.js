@@ -6,7 +6,8 @@ const conversationSchema = new mongoose.Schema({
     startTime: {type: Date, required: true, default: Date.now},
     messages: [{
         role: {type: String, required: true},
-        content: {type: String, required: true}
+        content: {type: String, required: true},
+        timestamp: {type: Date, default: Date.now}  // ← ADD THIS LINE
     }]
 });
 

@@ -4,12 +4,40 @@ import formatTime from "../util/timeUtil.js"
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
-  const { chats } = useContext(ChatContext);
+  const { chats, deleteChat } = useContext(ChatContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleNewChat = () => {
     navigate("/");
+  }
+
+  const handleDeleteChat = async (e, chatId) => {
+    e.preventDefault(); // Prevent navigation when clicking delete
+    e.stopPropagation();
+    
+    if (!window.confirm("Are you sure you want to delete this chat?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/conversation/${chatId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        deleteChat(chatId);
+        // If we're currently viewing this chat, navigate to home
+        if (location.pathname === `/conversation/${chatId}`) {
+          navigate("/");
+        }
+      } else {
+        alert("Failed to delete chat");
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      alert("Error deleting chat");
+    }
   }
 
   return (
@@ -52,6 +80,8 @@ const Sidebar = () => {
           marginBottom: "2rem",
           transition: "background 0.2s",
         }}
+        onMouseOver={(e) => e.target.style.background = "#3d75e6"}
+        onMouseOut={(e) => e.target.style.background = "#4985ff"}
       >
         + New Chat
       </button>
@@ -62,7 +92,9 @@ const Sidebar = () => {
         }}
       >
         {chats.length === 0 ? (
-          <div style={{ color: "#b0b5c3", textAlign: "center" }}>No chats yet.</div>
+          <div style={{ color: "#b0b5c3", textAlign: "center", marginTop: "2rem" }}>
+            No chats yet. Start a new conversation!
+          </div>
         ) : (
           chats.map(chat => (
             <Link
@@ -88,6 +120,7 @@ const Sidebar = () => {
                   marginBottom: "2px",
                   display: "flex",
                   flexDirection: "column",
+                  position: "relative",
                   boxShadow:
                     location.pathname === `/conversation/${chat._id}`
                       ? "0 2px 8px rgba(73, 133, 255, 0.10)"
@@ -106,6 +139,7 @@ const Sidebar = () => {
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
+                    paddingRight: "30px",
                   }}
                   title={chat.title}
                 >
@@ -120,6 +154,37 @@ const Sidebar = () => {
                 >
                   {formatTime(chat.startTime)}
                 </div>
+                
+                {/* Delete button */}
+                <button
+                  onClick={(e) => handleDeleteChat(e, chat._id)}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "10px",
+                    transform: "translateY(-50%)",
+                    background: "transparent",
+                    border: "none",
+                    color: "#ff6b6b",
+                    fontSize: "1.2rem",
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    opacity: 0.7,
+                    transition: "opacity 0.2s, background 0.2s",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.opacity = 1;
+                    e.target.style.background = "rgba(255, 107, 107, 0.1)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.opacity = 0.7;
+                    e.target.style.background = "transparent";
+                  }}
+                  title="Delete chat"
+                >
+                  🗑️
+                </button>
               </div>
             </Link>
           ))
