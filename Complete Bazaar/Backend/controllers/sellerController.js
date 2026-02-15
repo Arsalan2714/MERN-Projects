@@ -1,11 +1,18 @@
 const Product = require("../models/Product");
 
 exports.createProduct = async (req, res, next) => {
-  const { name, description, price, category, brand, rating, numReviews, stock, isFeatured, isDeleted } = req.body;
+  const { name, description, price, category, brand, rating, numReviews, stock } = req.body;
+
+  if(!req.file){
+    return res.status(400).json({ message: "Image is required" });
+  }
+
+  const imageUrl = req.file.path;
+
   try{
-    const product = new Product({name, description, price, category, brand, rating, numReviews, stock, isFeatured, isDeleted});
+    const product = new Product({name, description, price, category, brand, rating, numReviews, stock, imageUrl});
     await product.save();
-    res.status(201).json({ message: "Product is created" });
+    res.status(201).json( product );
   }catch(error){
     console.log(error);
     res.status(500).json({ message: error.message });

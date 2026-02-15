@@ -1,16 +1,25 @@
-import Chat from "./components/Chat";
+import {BrowserRouter, Routes, Route } from "react-router-dom"; 
+import AddProduct from "./components/AddProduct";
+import NavBar from "./nav/NavBar";
+
 
 function App() {
   return (
-    <div className="h-screen bg-[#0f172a] text-white flex flex-col">
-      <header className="py-4 border-b border-gray-800 text-center text-xl font-semibold tracking-wide">
-        🤖 AI Chatbot
-      </header>
-
-      <div className="flex-1 overflow-hidden">
-        <Chat />
+    <BrowserRouter>
+    <div className="min-h-screen bg-gray-100">
+      <div >
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<div>Home Page</div>} />
+          <Route path="/add-product" element={<AddProduct />} />
+          <Route path="/products" element={<div>Products Page</div>} />
+          <Route path="/cart" element={<div>Cart Page</div>} />
+          <Route path="/login" element={<div>Login Page</div>} />
+          <Route path="/signup" element={<div>Sign Page</div>} />
+        </Routes>
       </div>
     </div>
+    </BrowserRouter>
   );
 }
 

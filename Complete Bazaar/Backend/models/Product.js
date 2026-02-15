@@ -10,15 +10,13 @@ const productSchema = new mongoose.Schema({
   rating: { type: Number, required: true },
   numReviews: { type: Number, required: true },
   stock: { type: Number, required: true },
-  isFeatured: { type: Boolean, required: true },
-  isDeleted: { type: Boolean, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },
-  seller: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  //seller: {
+  //type: mongoose.Schema.Types.ObjectId,
+  //ref: "User",
+  //required: true,
+  //},
 });
 
 const Product = mongoose.model("Product", productSchema);
