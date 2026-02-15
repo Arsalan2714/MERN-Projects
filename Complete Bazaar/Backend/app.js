@@ -1,14 +1,14 @@
-import dotenv from "dotenv";
-import cors from "cors";
-import express from "express";
-import mongoose from "mongoose";
+const dotenv = require("dotenv");
+
+// External modules
+const cors = require("cors");
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
 // Local modules
-import * as errorController from "./controllers/errorController.js";
-import conversationRouter from "./routers/conversationRouter.js";
-import * as chatgptService from "./service/chatgptService.js";
-
-
+const errorController = require("./controllers/errorController.js");
+const sellerRouter = require("./routers/sellerRouter.js");
 
 dotenv.config();
 
@@ -22,27 +22,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API routes
-app.use("/api", conversationRouter);
+app.use("/api/seller", sellerRouter);
 
 // 404 handler
 app.use(errorController.get404);
 
 const PORT = process.env.PORT || 3001;
 
-mongoose
-  .connect(MONGO_DB_URL)
-  .then(() => {
-    chatgptService.initAIAssistant((err, assistant) => {
-      if (err) {
-        console.error("Failed to initialize AI assistant:", err);
-        process.exit(1);
-      }
-
-      app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-      });
-    });
+mongoose.connect(MONGO_DB_URL).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   })
-  .catch((err) => {
-    console.error("MongoDB connection failed:", err);
-  });
+})
