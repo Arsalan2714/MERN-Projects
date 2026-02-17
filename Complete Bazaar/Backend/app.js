@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 // Local modules
 const errorController = require("./controllers/errorController.js");
 const sellerRouter = require("./routers/sellerRouter.js");
+const authRouter = require("./routers/authRouter.js");
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // API routes
 app.use("/api/seller", sellerRouter);
+app.use("/api/auth", authRouter);
 
 // 404 handler
 app.use(errorController.get404);
