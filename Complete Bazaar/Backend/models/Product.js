@@ -12,11 +12,11 @@ const productSchema = new mongoose.Schema({
   stock: { type: Number, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },
-  //seller: {
-  //type: mongoose.Schema.Types.ObjectId,
-  //ref: "User",
-  //required: true,
-  //},
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
 const Product = mongoose.model("Product", productSchema);

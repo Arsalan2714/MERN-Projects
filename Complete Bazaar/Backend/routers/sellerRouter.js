@@ -18,6 +18,8 @@ const storage = multer.diskStorage({
 
 sellerRouter.post(
   "/products",
+  isLoggedIn,
+  isSeller,
   multer({storage: storage}).single("image"),sellerController.createProduct
 )
 

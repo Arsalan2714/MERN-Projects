@@ -1,10 +1,13 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "../../store/slices/authSlice";
 
 const Login = () => {
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
     const navigate = useNavigate();
+    const dispatch = useDispatch(); 
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -38,8 +41,7 @@ const Login = () => {
                 setLoading(false);
                 return;
             }
-             localStorage.setItem("token", data.token);
-             localStorage.setItem("userType", data.userType);
+             dispatch(login(data));
             navigate("/");
         } catch (err) {
             setError("Something went wrong. Please try again later.");
