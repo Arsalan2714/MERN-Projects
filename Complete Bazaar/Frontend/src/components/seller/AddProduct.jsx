@@ -16,7 +16,7 @@ const AddProduct = () => {
 
   const token = useSelector((state) => state.auth.token);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
 
@@ -31,15 +31,19 @@ const AddProduct = () => {
     formData.append("stock", stockRef.current.value);
     formData.append("image", imageRef.current.files[0]);
 
-    fetch("http://localhost:3001/api/seller/products", {
+    const response = await fetch("http://localhost:3001/api/seller/products", {
       method: "POST",
       body: formData,
       headers: {
         "Authorization": `Bearer ${token}`,
       },
-    }).then((res) => res.json())
-    .then((data) => console.log(data));
-    navigate("/");
+    });
+    if(response.status === 201){
+      navigate("/");
+    }else {
+      const data = await response.json();
+      console.log(data);
+    }
   };
 
   const inputClasses =

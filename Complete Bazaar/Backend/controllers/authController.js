@@ -25,7 +25,7 @@ exports.signup = [
       const hashedPassword = await bcrypt.hash(password, 12);
       const user = new User({ firstName, lastName, email, password: hashedPassword, userType });
       await user.save();
-      res.status(201).json({message: "User created successfully"});
+      res.status(201).json({ message: "User created successfully" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ errorMessages: error.message });
@@ -44,7 +44,7 @@ exports.login = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json({ errorMessages: "Invalid email or password" });
     }
-    const token = jwt.sign({id: user._id, userType: user.userType}, process.env.JWT_SECRET, {expiresIn: "1h"});
+    const token = jwt.sign({ userId: user._id, userType: user.userType }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.status(200).json({ token, userType: user.userType });
   } catch (error) {
     console.log(error);

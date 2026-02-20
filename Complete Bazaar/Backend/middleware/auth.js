@@ -1,27 +1,30 @@
+const jwt = require("jsonwebtoken");
+
 exports.isLoggedIn = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
-    if(!token){
+    if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    try{
-        const {userId, userType} = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId   = userId;
+    try {
+        const { userId, userType } = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = userId;
         req.userType = userType;
-    }catch(error){
-        return res.status(401).json({ message: "Unauthorized" });
+    } catch (error) {
+        return res.status(401).json({ error: error.message });
     }
     next();
 }
 
+
 exports.isSeller = (req, res, next) => {
-    if(req.userType !== "seller"){
+    if (req.userType !== "seller") {
         return res.status(403).json({ message: "Forbidden" });
     }
     next();
-}   
+}
 
 exports.isCustomer = (req, res, next) => {
-    if(req.userType !== "customer"){
+    if (req.userType !== "customer") {
         return res.status(403).json({ message: "Forbidden" });
     }
     next();
