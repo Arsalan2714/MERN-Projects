@@ -9,8 +9,9 @@ const bodyParser = require("body-parser");
 // Local modules
 const errorController = require("./controllers/errorController.js");
 const sellerRouter = require("./routers/sellerRouter.js");
+const customerRouter = require("./routers/customerRouter.js");
 const authRouter = require("./routers/authRouter.js");
-const { isLoggedIn, isSeller } = require("./middleware/auth.js");
+const { isLoggedIn, isSeller, isCustomer } = require("./middleware/auth.js");
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.use("/uploads", express.static("uploads"));
 // API routes
 app.use("/api/seller", isLoggedIn,
   isSeller, sellerRouter);
+app.use("/api/customer", isLoggedIn,
+  isCustomer, customerRouter);
 app.use("/api/auth", authRouter);
 
 // 404 handler
