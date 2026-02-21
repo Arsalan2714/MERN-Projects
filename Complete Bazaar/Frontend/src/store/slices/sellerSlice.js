@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+
 
 const initialState = {
   products: [],
@@ -10,12 +10,18 @@ const initialState = {
 const fetchSellerProdusts = createAsyncThunk(
   "seller/fetchSellerProdusts",
   async () => {
-    const response = await axios.get("http://localhost:3001/api/seller/products", {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:3001/api/seller/products", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
-    return response.json();
+    const body = await response.json();
+    if (response.status === 200) {
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
   }
 );
 
@@ -43,7 +49,21 @@ const sellerSlice = createSlice({
       state.errorMessage = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(fetchSellerProdusts.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchSellerProdusts.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.products = action.payload;
+    });
+    builder.addCase(fetchSellerProdusts.rejected, (state, action) => {
+      state.isLoading = false;
+      state.errorMessage = [action.error.message];
+    });
+  },
 });
 
+export { fetchSellerProdusts };
 export const { setProducts } = sellerSlice.actions;
 export default sellerSlice.reducer;
