@@ -48,6 +48,14 @@ const NavBar = () => {
                             
                         </Link>
                         }
+                        { isLoggedIn && userType === "customer" &&
+                        <Link
+                            to="/orders"
+                            className="text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition-all duration-200"
+                        >
+                            📝 Orders
+                        </Link>
+                        }
                     </div>
                 </div>
 

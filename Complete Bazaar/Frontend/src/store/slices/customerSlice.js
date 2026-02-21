@@ -1,0 +1,174 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+
+const initialState = {
+  products: [],
+  cart: [],
+  orders: [],
+  isLoading: false,
+  errorMessage: [],
+};
+
+const fetchCustomerData = createAsyncThunk(
+  "customer/fetchCustomerData",
+  async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:3001/api/customer/data", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+export const addToCart = createAsyncThunk(
+  "customer/addToCart",
+  async (productId) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:3001/api/customer/cart/${productId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+export const removeFromCart = createAsyncThunk(
+  "customer/removeFromCart",
+  async (productId) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:3001/api/customer/cart/${productId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+export const placeOrder = createAsyncThunk(
+  "customer/placeOrder",
+  async ({ paymentMethod, shippingAddress }, { dispatch }) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:3001/api/customer/order", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ paymentMethod, shippingAddress }),
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      await dispatch(fetchCustomerData());
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+export const cancelOrder = createAsyncThunk(
+  "customer/cancelOrder",
+  async (orderId, { dispatch }) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:3001/api/customer/order/${orderId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      await dispatch(fetchCustomerData());
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+export const removeOrder = createAsyncThunk(
+  "customer/removeOrder",
+  async (orderId, { dispatch }) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:3001/api/customer/order/${orderId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      await dispatch(fetchCustomerData());
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
+const customerSlice = createSlice({
+  name: "customer",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchCustomerData.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchCustomerData.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const { products, cart, orders } = action.payload;
+      state.products = products;
+      state.cart = cart;
+      state.orders = orders;
+    });
+    builder.addCase(fetchCustomerData.rejected, (state, action) => {
+      state.isLoading = false;
+      state.errorMessage = [action.error.message];
+    });
+    builder.addCase(addToCart.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(addToCart.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.cart = action.payload;
+    });
+    builder.addCase(addToCart.rejected, (state, action) => {
+      state.isLoading = false;
+      state.errorMessage = [action.error.message];
+    });
+    builder.addCase(removeFromCart.fulfilled, (state, action) => {
+      state.cart = action.payload;
+    });
+    builder.addCase(removeFromCart.rejected, (state, action) => {
+      state.errorMessage = [action.error.message];
+    });
+    builder.addCase(placeOrder.rejected, (state, action) => {
+      state.errorMessage = [action.error.message];
+    });
+  },
+});
+
+export { fetchCustomerData };
+export default customerSlice.reducer;

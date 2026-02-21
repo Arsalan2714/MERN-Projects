@@ -2,10 +2,12 @@ const express = require("express");
 const customerController = require("../controllers/customerController.js");
 const customerRouter = express.Router();
 
-customerRouter.get("/products", customerController.getProducts);
+customerRouter.get("/data", customerController.getData);
 customerRouter.post("/cart/:id", customerController.addToCart);
-customerRouter.get("/cart/:id", customerController.getCart);
 customerRouter.delete("/cart/:id", customerController.removeFromCart);
+customerRouter.post("/order", customerController.createOrder);
+customerRouter.delete("/order/:id", customerController.cancelOrder);
+customerRouter.patch("/order/:id", customerController.removeOrder);
 
 
 
