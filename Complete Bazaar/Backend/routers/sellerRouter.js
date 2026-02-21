@@ -27,4 +27,14 @@ sellerRouter.get(
   sellerController.getProducts
 )
 
+sellerRouter.delete(
+  "/products/:id",
+  sellerController.deleteProduct
+)
+
+sellerRouter.put(
+  "/products/:id",
+  multer({storage: storage}).single("image"),sellerController.updateProduct
+)
+
 module.exports = sellerRouter;

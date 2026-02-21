@@ -106,7 +106,7 @@ const AddProduct = () => {
           {/* Row 2: Price, Category, Stock */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className={labelClasses}>Price ($)</label>
+              <label className={labelClasses}>Price (₹)</label>
               <input
                 type="number"
                 placeholder="0.00"

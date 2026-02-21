@@ -1,18 +1,42 @@
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { fetchSellerProdusts } from "../../store/slices/sellerSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { fetchSellerProdusts, deleteProduct } from "../../store/slices/sellerSlice";
+import ErrorMessage from '../common/ErrorMessages'
+import SellerProduct from "./SellerProduct";
 
 const SellerHome = () => {
     const { products, isLoading, errorMessage } = useSelector(
         (state) => state.seller
     );
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = useSelector((state) => state.auth.token);
 
     useEffect(() => {
         dispatch(fetchSellerProdusts());
     }, []);
+
+    const handleEditProduct = (productId) => {
+        // Navigate to edit product page
+        navigate(`/edit-product/${productId}`);
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        const response = await fetch(`http://localhost:3001/api/seller/products/${productId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (response.status === 200) {
+            dispatch(deleteProduct(productId));
+        } else {
+            const data = await response.json();
+            console.log(data);
+        }
+    };
 
     // Loading State
     if (isLoading) {
@@ -67,25 +91,6 @@ const SellerHome = () => {
         );
     }
 
-    // Star rating helper
-    const renderStars = (rating) => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <svg
-                    key={i}
-                    className={`w-4 h-4 ${i <= Math.round(rating) ? "text-amber-400" : "text-slate-600"
-                        }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            );
-        }
-        return stars;
-    };
-
     // Products loaded successfully
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-10 px-4">
@@ -96,6 +101,7 @@ const SellerHome = () => {
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                             Your Products
                         </h1>
+                        <ErrorMessage errorMessage={errorMessage} />
                         <p className="text-slate-400 mt-1">
                             {products.length}{" "}
                             {products.length === 1 ? "product" : "products"} listed
@@ -123,7 +129,7 @@ const SellerHome = () => {
                 </div>
 
                 {/* Empty State */}
-                {products.length === 0 ? (
+                {products && products.length === 0 ? (
                     <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-2xl p-12 text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/50 border border-slate-600 mb-5">
                             <svg
@@ -170,63 +176,7 @@ const SellerHome = () => {
                     /* Product Grid */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {products.map((product) => (
-                            <div
-                                key={product._id}
-                                className="bg-slate-800/60 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-indigo-500/10 transition-all duration-300 group"
-                            >
-                                {/* Product Image */}
-                                <div className="relative h-48 bg-slate-700/50 overflow-hidden">
-                                    <img
-                                        src={`http://localhost:3001/${product.imageUrl}`}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    {/* Category Badge */}
-                                    <span className="absolute top-3 left-3 px-2.5 py-1 text-xs font-medium rounded-full bg-indigo-500/80 text-white backdrop-blur-sm">
-                                        {product.category}
-                                    </span>
-                                    {/* Stock Badge */}
-                                    <span
-                                        className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-medium rounded-full backdrop-blur-sm ${product.stock > 0
-                                                ? "bg-emerald-500/80 text-white"
-                                                : "bg-red-500/80 text-white"
-                                            }`}
-                                    >
-                                        {product.stock > 0
-                                            ? `${product.stock} in stock`
-                                            : "Out of stock"}
-                                    </span>
-                                </div>
-
-                                {/* Product Info */}
-                                <div className="p-5">
-                                    <h3 className="text-lg font-semibold text-slate-100 mb-1 truncate">
-                                        {product.name}
-                                    </h3>
-                                    <p className="text-sm text-slate-400 mb-3">
-                                        {product.brand}
-                                    </p>
-                                    <p className="text-sm text-slate-500 mb-4 line-clamp-2 leading-relaxed">
-                                        {product.description}
-                                    </p>
-
-                                    {/* Rating */}
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="flex">{renderStars(product.rating)}</div>
-                                        <span className="text-xs text-slate-500">
-                                            ({product.numReviews}{" "}
-                                            {product.numReviews === 1 ? "review" : "reviews"})
-                                        </span>
-                                    </div>
-
-                                    {/* Price */}
-                                    <div className="flex items-center justify-between pt-3 border-t border-slate-700/50">
-                                        <span className="text-xl font-bold text-indigo-400">
-                                            ${product.price.toFixed(2)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            <SellerProduct key={product._id} product={product} handleDeleteProduct={handleDeleteProduct} handleEditProduct={handleEditProduct} />
                         ))}
                     </div>
                 )}

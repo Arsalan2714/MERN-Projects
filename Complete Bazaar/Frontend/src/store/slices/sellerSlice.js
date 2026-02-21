@@ -65,5 +65,5 @@ const sellerSlice = createSlice({
 });
 
 export { fetchSellerProdusts };
-export const { setProducts } = sellerSlice.actions;
+export const { setProducts, deleteProduct } = sellerSlice.actions;
 export default sellerSlice.reducer;
