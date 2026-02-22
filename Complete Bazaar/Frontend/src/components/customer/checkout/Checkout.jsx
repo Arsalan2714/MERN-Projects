@@ -5,6 +5,7 @@ import { fetchCustomerData, placeOrder } from "../../../store/slices/customerSli
 
 const Checkout = () => {
     const { products, cart, isLoading } = useSelector((state) => state.customer);
+    const token = useSelector((state) => state.auth.token);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -20,6 +21,13 @@ const Checkout = () => {
         landmark: "",
     });
     const [errors, setErrors] = useState({});
+
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!token) {
+            navigate("/login");
+        }
+    }, [token]);
 
     useEffect(() => {
         if (products.length === 0) {
@@ -245,8 +253,8 @@ const Checkout = () => {
                             <div className="space-y-3">
                                 <label
                                     className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all duration-200 ${paymentMethod === "Cash on Delivery"
-                                            ? "border-indigo-500 bg-indigo-500/10"
-                                            : "border-slate-700 hover:border-slate-600"
+                                        ? "border-indigo-500 bg-indigo-500/10"
+                                        : "border-slate-700 hover:border-slate-600"
                                         }`}
                                 >
                                     <input
@@ -267,8 +275,8 @@ const Checkout = () => {
                                 </label>
                                 <label
                                     className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all duration-200 ${paymentMethod === "Online"
-                                            ? "border-indigo-500 bg-indigo-500/10"
-                                            : "border-slate-700 hover:border-slate-600"
+                                        ? "border-indigo-500 bg-indigo-500/10"
+                                        : "border-slate-700 hover:border-slate-600"
                                         }`}
                                 >
                                     <input

@@ -19,6 +19,10 @@ const CustomerHome = () => {
     }, []);
 
     const handleAddToCart = async (productId) => {
+        if (!token) {
+            navigate("/login");
+            return;
+        }
         await dispatch(addToCart(productId));
         navigate("/cart");
     };

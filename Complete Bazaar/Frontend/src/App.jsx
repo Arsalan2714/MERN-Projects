@@ -4,6 +4,7 @@ import EditProduct from "./components/seller/EditProduct";
 import NavBar from "./nav/NavBar";
 import Signup from "./components/auth/signup";
 import Login from "./components/auth/login";
+import ForgotPassword from "./components/auth/ForgotPassword";
 import { useSelector } from "react-redux";
 import CustomerHome from "./components/customer/CustomerHome";
 import SellerHome from "./components/seller/SellerHome";
@@ -28,6 +29,7 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Routes>
         </div>
       </div>

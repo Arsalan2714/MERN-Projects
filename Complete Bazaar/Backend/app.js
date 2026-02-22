@@ -1,4 +1,5 @@
 const dotenv = require("dotenv");
+dotenv.config();
 
 // External modules
 const cors = require("cors");
@@ -13,8 +14,6 @@ const customerRouter = require("./routers/customerRouter.js");
 const authRouter = require("./routers/authRouter.js");
 const { isLoggedIn, isSeller, isCustomer } = require("./middleware/auth.js");
 
-dotenv.config();
-
 const MONGO_DB_URL = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@airbnb.zr7xw53.mongodb.net/${process.env.MONGO_DB_DATABASE}`;
 
 const app = express();
@@ -25,7 +24,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
-// API routes
+// Public routes (no auth required)
+app.get("/api/products", async (req, res) => {
+  const Product = require("./models/Product.js");
+  const products = await Product.find();
+  res.status(200).json({ products });
+});
+
+// Protected API routes
 app.use("/api/seller", isLoggedIn,
   isSeller, sellerRouter);
 app.use("/api/customer", isLoggedIn,

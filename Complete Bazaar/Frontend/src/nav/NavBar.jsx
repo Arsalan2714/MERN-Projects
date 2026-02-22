@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { logout } from "../store/slices/authSlice";
-import { login } from "../store/slices/authSlice";      
+import { login } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 const NavBar = () => {
     const { isLoggedIn, userType } = useSelector((state) => state.auth);
@@ -39,22 +39,22 @@ const NavBar = () => {
                         >
                             Products
                         </Link>
-                        { isLoggedIn && userType === "customer" &&
-                        <Link
-                            to="/cart"
-                            className="text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition-all duration-200"
-                        >
-                            🛒 Cart
-                            
-                        </Link>
+                        {userType !== "seller" &&
+                            <Link
+                                to="/cart"
+                                className="text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition-all duration-200"
+                            >
+                                🛒 Cart
+
+                            </Link>
                         }
-                        { isLoggedIn && userType === "customer" &&
-                        <Link
-                            to="/orders"
-                            className="text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition-all duration-200"
-                        >
-                            📝 Orders
-                        </Link>
+                        {userType !== "seller" &&
+                            <Link
+                                to="/orders"
+                                className="text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition-all duration-200"
+                            >
+                                📝 Orders
+                            </Link>
                         }
                     </div>
                 </div>

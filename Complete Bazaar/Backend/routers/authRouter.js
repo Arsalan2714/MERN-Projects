@@ -15,4 +15,8 @@ authRouter.post(
   authController.login
 )
 
+authRouter.post("/forgot-password", authController.forgotPassword);
+authRouter.post("/verify-otp", authController.verifyOtp);
+authRouter.post("/reset-password", authController.resetPassword);
+
 module.exports = authRouter;

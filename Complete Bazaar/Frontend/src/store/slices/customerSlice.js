@@ -13,6 +13,19 @@ const fetchCustomerData = createAsyncThunk(
   "customer/fetchCustomerData",
   async () => {
     const token = localStorage.getItem("token");
+
+    // If not logged in, fetch only products from public API
+    if (!token) {
+      const response = await fetch("http://localhost:3001/api/products");
+      const body = await response.json();
+      if (response.status === 200) {
+        return { products: body.products, cart: [], orders: [] };
+      } else {
+        throw new Error("Failed to load products");
+      }
+    }
+
+    // If logged in, fetch full customer data
     const response = await fetch("http://localhost:3001/api/customer/data", {
       headers: {
         Authorization: `Bearer ${token}`,
