@@ -7,7 +7,6 @@ const Signup = () => {
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
     const confirmPasswordRef = useRef(null);
-    const userTypeRef = useRef(null);
     const navigate = useNavigate();
 
     const [step, setStep] = useState(1); // 1 = form, 2 = OTP
@@ -29,9 +28,8 @@ const Signup = () => {
         const emailVal = emailRef.current.value.trim();
         const password = passwordRef.current.value;
         const confirmPassword = confirmPasswordRef.current.value;
-        const userType = userTypeRef.current.value;
 
-        if (!firstName || !lastName || !emailVal || !password || !confirmPassword || !userType) {
+        if (!firstName || !lastName || !emailVal || !password || !confirmPassword) {
             setError("All fields are required.");
             return;
         }
@@ -49,7 +47,7 @@ const Signup = () => {
             const res = await fetch("http://localhost:3001/api/auth/signup/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, email: emailVal, password, confirmPassword, userType }),
+                body: JSON.stringify({ firstName, lastName, email: emailVal, password, confirmPassword, userType: "customer" }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -106,13 +104,13 @@ const Signup = () => {
         const lastName = lastNameRef.current?.value?.trim() || "";
         const password = passwordRef.current?.value || "";
         const confirmPassword = confirmPasswordRef.current?.value || "";
-        const userType = userTypeRef.current?.value || "";
+
 
         try {
             const res = await fetch("http://localhost:3001/api/auth/signup/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, email, password, confirmPassword, userType }),
+                body: JSON.stringify({ firstName, lastName, email, password, confirmPassword, userType: "customer" }),
             });
             const data = await res.json();
             if (res.ok) {
@@ -154,8 +152,8 @@ const Signup = () => {
                 {/* Step Indicator */}
                 <div className="flex items-center justify-center gap-3 mb-6">
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step === 1
-                            ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                            : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                         }`}>
                         {step > 1 ? (
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,8 +166,8 @@ const Signup = () => {
                     </div>
                     <div className="w-8 h-px bg-slate-600"></div>
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step === 2
-                            ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                            : "bg-slate-700/50 text-slate-500 border border-slate-700"
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-slate-700/50 text-slate-500 border border-slate-700"
                         }`}>
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 2 ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-500"
                             }`}>2</span>
@@ -289,15 +287,7 @@ const Signup = () => {
                                 </div>
                             </div>
 
-                            {/* User Type */}
-                            <div>
-                                <label className={labelClasses}>I want to</label>
-                                <select ref={userTypeRef} defaultValue="" className={inputClasses}>
-                                    <option value="" disabled>Select account type</option>
-                                    <option value="customer">Shop as a Customer</option>
-                                    <option value="seller">Sell as a Seller</option>
-                                </select>
-                            </div>
+
                         </>
                     ) : (
                         <>
@@ -375,6 +365,13 @@ const Signup = () => {
                     >
                         Sign in instead
                     </Link>
+
+                    {/* Seller Signup Link */}
+                    <div className="text-center">
+                        <Link to="/seller/signup" className="text-xs text-slate-500 hover:text-amber-400 transition-colors">
+                            Want to sell instead? Create a seller account →
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>

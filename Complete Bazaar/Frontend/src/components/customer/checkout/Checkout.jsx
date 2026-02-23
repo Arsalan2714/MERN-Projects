@@ -10,6 +10,8 @@ const Checkout = () => {
     const navigate = useNavigate();
 
     const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+    const [savedAddresses, setSavedAddresses] = useState([]);
+    const [selectedAddrId, setSelectedAddrId] = useState(null); // null = new address
     const [address, setAddress] = useState({
         fullName: "",
         phone: "",
@@ -34,6 +36,52 @@ const Checkout = () => {
             dispatch(fetchCustomerData());
         }
     }, []);
+
+    // Fetch saved addresses & auto-fill default
+    useEffect(() => {
+        if (!token) return;
+        const fetchAddresses = async () => {
+            try {
+                const res = await fetch("http://localhost:3001/api/customer/profile", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (res.ok && data.addresses?.length > 0) {
+                    setSavedAddresses(data.addresses);
+                    const defaultAddr = data.addresses.find(a => a.isDefault) || data.addresses[0];
+                    fillFromSaved(defaultAddr, data.firstName, data.lastName, data.phone);
+                    setSelectedAddrId(defaultAddr._id);
+                }
+            } catch (err) { /* ignore */ }
+        };
+        fetchAddresses();
+    }, [token]);
+
+    const fillFromSaved = (addr, fName, lName, phone) => {
+        setAddress({
+            fullName: `${fName || ""} ${lName || ""}`.trim(),
+            phone: phone || "",
+            addressLine1: addr.street || "",
+            addressLine2: "",
+            city: addr.city || "",
+            state: addr.state || "",
+            pincode: addr.pincode || "",
+            landmark: "",
+        });
+        setErrors({});
+    };
+
+    const handleSelectAddress = (addr) => {
+        setSelectedAddrId(addr._id);
+        // we need profile name/phone — grab from existing form fullName or fetch
+        fillFromSaved(addr, address.fullName.split(" ")[0], address.fullName.split(" ").slice(1).join(" "), address.phone);
+    };
+
+    const handleNewAddress = () => {
+        setSelectedAddrId(null);
+        setAddress({ fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" });
+        setErrors({});
+    };
 
     // Redirect if cart is empty
     useEffect(() => {
@@ -126,6 +174,54 @@ const Checkout = () => {
                                 </svg>
                                 Delivery Address
                             </h2>
+
+                            {/* Saved Address Picker */}
+                            {savedAddresses.length > 0 && (
+                                <div className="mb-5">
+                                    <p className="text-sm text-slate-400 mb-3">Select a saved address</p>
+                                    <div className="space-y-2">
+                                        {savedAddresses.map((addr) => (
+                                            <button
+                                                key={addr._id}
+                                                onClick={() => handleSelectAddress(addr)}
+                                                className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${selectedAddrId === addr._id
+                                                        ? "border-indigo-500 bg-indigo-500/10"
+                                                        : "border-slate-700 hover:border-slate-600 bg-slate-700/20"
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-sm font-semibold text-slate-200">
+                                                        {addr.label === "Home" ? "🏠" : addr.label === "Work" ? "🏢" : "📍"} {addr.label}
+                                                    </span>
+                                                    {addr.isDefault && (
+                                                        <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Default</span>
+                                                    )}
+                                                    {selectedAddrId === addr._id && (
+                                                        <svg className="w-4 h-4 text-indigo-400 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-slate-400 leading-relaxed">
+                                                    {addr.street}{addr.city ? `, ${addr.city}` : ""}{addr.state ? `, ${addr.state}` : ""}{addr.pincode ? ` - ${addr.pincode}` : ""}
+                                                </p>
+                                            </button>
+                                        ))}
+                                        {/* Option to enter new address */}
+                                        <button
+                                            onClick={handleNewAddress}
+                                            className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center gap-2 ${selectedAddrId === null
+                                                    ? "border-indigo-500 bg-indigo-500/10"
+                                                    : "border-slate-700 hover:border-slate-600 bg-slate-700/20"
+                                                }`}
+                                        >
+                                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                            <span className="text-sm text-slate-300">Enter a new address</span>
+                                            {selectedAddrId === null && (
+                                                <svg className="w-4 h-4 text-indigo-400 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Full Name */}

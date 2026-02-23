@@ -172,32 +172,37 @@ const customerSlice = createSlice({
     });
     builder.addCase(fetchCustomerData.fulfilled, (state, action) => {
       state.isLoading = false;
-      const { products, cart, wishlist, orders } = action.payload;
+      const { products, cart, wishlist, orders, firstName } = action.payload;
       state.products = products;
       state.cart = cart;
       state.wishlist = wishlist || [];
       state.orders = orders;
+      // Persist firstName so navbar/profile can use it
+      if (firstName) {
+        localStorage.setItem("firstName", firstName);
+      }
     });
     builder.addCase(fetchCustomerData.rejected, (state, action) => {
       state.isLoading = false;
       state.errorMessage = [action.error.message];
     });
     builder.addCase(addToCart.pending, (state) => {
-      state.isLoading = true;
+      state.isLoading = false;
     });
     builder.addCase(addToCart.fulfilled, (state, action) => {
       state.isLoading = false;
       state.cart = action.payload;
+      state.cartError = "";
     });
     builder.addCase(addToCart.rejected, (state, action) => {
       state.isLoading = false;
-      state.errorMessage = [action.error.message];
+      state.cartError = action.error.message;
     });
     builder.addCase(removeFromCart.fulfilled, (state, action) => {
       state.cart = action.payload;
     });
-    builder.addCase(removeFromCart.rejected, (state, action) => {
-      state.errorMessage = [action.error.message];
+    builder.addCase(removeFromCart.rejected, (state) => {
+      // silently fail - don't show full-page error for cart actions
     });
     builder.addCase(placeOrder.rejected, (state, action) => {
       state.errorMessage = [action.error.message];
@@ -205,8 +210,8 @@ const customerSlice = createSlice({
     builder.addCase(toggleWishlist.fulfilled, (state, action) => {
       state.wishlist = action.payload;
     });
-    builder.addCase(toggleWishlist.rejected, (state, action) => {
-      state.errorMessage = [action.error.message];
+    builder.addCase(toggleWishlist.rejected, (state) => {
+      // silently fail - don't show full-page error for wishlist actions
     });
   },
 });

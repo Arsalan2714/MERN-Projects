@@ -17,6 +17,13 @@ const ProductDetails = () => {
     const [error, setError] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [relatedProducts, setRelatedProducts] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState("");
+    const [reviewError, setReviewError] = useState("");
+    const [reviewSubmitted, setReviewSubmitted] = useState(false);
+    const [submittingReview, setSubmittingReview] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -54,6 +61,20 @@ const ProductDetails = () => {
         fetchRelated();
     }, [product]);
 
+    // Fetch reviews
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const res = await fetch(`http://localhost:3001/api/reviews/${id}`);
+                const data = await res.json();
+                if (res.ok) {
+                    setReviews(data.reviews);
+                }
+            } catch (err) { /* ignore */ }
+        };
+        fetchReviews();
+    }, [id]);
+
     const isInCart = cart && cart.includes(id);
     const cartItemCount = cart ? cart.filter((pid) => pid === id).length : 0;
 
@@ -82,17 +103,36 @@ const ProductDetails = () => {
 
     const renderStars = (rating) => {
         const stars = [];
+        const fullStars = Math.floor(rating);
+        const hasHalf = rating - fullStars >= 0.25 && rating - fullStars < 0.75;
+        const roundUp = rating - fullStars >= 0.75;
+        const starPath = "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
         for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <svg
-                    key={i}
-                    className={`w-5 h-5 ${i <= Math.round(rating) ? "text-amber-400" : "text-slate-600"}`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            );
+            if (i <= fullStars || (roundUp && i === fullStars + 1)) {
+                stars.push(
+                    <svg key={i} className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d={starPath} />
+                    </svg>
+                );
+            } else if (hasHalf && i === fullStars + 1) {
+                stars.push(
+                    <svg key={i} className="w-5 h-5" viewBox="0 0 20 20">
+                        <defs>
+                            <clipPath id={`half-${i}`}>
+                                <rect x="0" y="0" width="10" height="20" />
+                            </clipPath>
+                        </defs>
+                        <path d={starPath} fill="#475569" />
+                        <path d={starPath} fill="#fbbf24" clipPath={`url(#half-${i})`} />
+                    </svg>
+                );
+            } else {
+                stars.push(
+                    <svg key={i} className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d={starPath} />
+                    </svg>
+                );
+            }
         }
         return stars;
     };
@@ -339,6 +379,173 @@ const ProductDetails = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold text-slate-100 mb-6">Ratings & Reviews</h2>
+
+                    {/* Review Form */}
+                    {token && !reviewSubmitted && !reviews.find(r => r.customer?._id === undefined) && (
+                        <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 mb-8">
+                            <h3 className="text-lg font-semibold text-slate-200 mb-4">Write a Review</h3>
+                            {reviewError && (
+                                <div className="mb-4 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                                    {reviewError}
+                                </div>
+                            )}
+                            {/* Star Selector */}
+                            <div className="flex items-center gap-1 mb-4">
+                                <span className="text-sm text-slate-400 mr-2">Your rating:</span>
+                                {[1, 2, 3, 4, 5].map((star) => {
+                                    const activeRating = hoverRating || reviewRating;
+                                    const isFull = activeRating >= star;
+                                    const isHalf = !isFull && activeRating >= star - 0.5;
+                                    const starPath = "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
+                                    return (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => {
+                                                // First click = half, second click on same = full
+                                                if (reviewRating === star - 0.5) {
+                                                    setReviewRating(star);
+                                                } else if (reviewRating === star) {
+                                                    setReviewRating(star - 0.5);
+                                                } else {
+                                                    setReviewRating(star - 0.5);
+                                                }
+                                            }}
+                                            onMouseEnter={() => setHoverRating(star - 0.5)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            className="cursor-pointer transition-transform hover:scale-110"
+                                        >
+                                            {isFull ? (
+                                                <svg className="w-7 h-7 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d={starPath} />
+                                                </svg>
+                                            ) : isHalf ? (
+                                                <svg className="w-7 h-7" viewBox="0 0 20 20">
+                                                    <defs>
+                                                        <clipPath id={`sel-half-${star}`}>
+                                                            <rect x="0" y="0" width="10" height="20" />
+                                                        </clipPath>
+                                                    </defs>
+                                                    <path d={starPath} fill="#475569" />
+                                                    <path d={starPath} fill="#fbbf24" clipPath={`url(#sel-half-${star})`} />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-7 h-7 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d={starPath} />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                                {reviewRating > 0 && (
+                                    <span className="text-sm text-amber-400 ml-2 font-medium">{reviewRating}/5</span>
+                                )}
+                            </div>
+                            {/* Comment */}
+                            <textarea
+                                value={reviewComment}
+                                onChange={(e) => setReviewComment(e.target.value)}
+                                placeholder="Share your experience with this product..."
+                                rows={3}
+                                className="w-full px-4 py-3 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none mb-4"
+                            />
+                            <button
+                                onClick={async () => {
+                                    if (reviewRating === 0) { setReviewError("Please select a rating"); return; }
+                                    if (!reviewComment.trim()) { setReviewError("Please write a comment"); return; }
+                                    setReviewError("");
+                                    setSubmittingReview(true);
+                                    try {
+                                        const res = await fetch(`http://localhost:3001/api/customer/review/${id}`, {
+                                            method: "POST",
+                                            headers: {
+                                                Authorization: `Bearer ${token}`,
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
+                                        });
+                                        const data = await res.json();
+                                        if (res.status === 201) {
+                                            setReviews((prev) => [data, ...prev]);
+                                            setReviewSubmitted(true);
+                                            // Update product rating & review count live
+                                            setProduct((prev) => {
+                                                const newCount = (prev.numReviews || 0) + 1;
+                                                const oldTotal = (prev.rating || 0) * (prev.numReviews || 0);
+                                                const newRating = Math.round(((oldTotal + reviewRating) / newCount) * 10) / 10;
+                                                return { ...prev, rating: newRating, numReviews: newCount };
+                                            });
+                                            setReviewRating(0);
+                                            setReviewComment("");
+                                        } else {
+                                            setReviewError(data.error || "Failed to submit review");
+                                        }
+                                    } catch (err) {
+                                        setReviewError("Something went wrong. Please try again.");
+                                    }
+                                    setSubmittingReview(false);
+                                }}
+                                disabled={submittingReview}
+                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-medium shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 cursor-pointer disabled:opacity-50"
+                            >
+                                {submittingReview ? "Submitting..." : "Submit Review"}
+                            </button>
+                        </div>
+                    )}
+
+                    {reviewSubmitted && (
+                        <div className="mb-6 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
+                            ✅ Thank you! Your review has been submitted.
+                        </div>
+                    )}
+
+                    {!token && (
+                        <div className="mb-6 px-4 py-3 rounded-lg bg-slate-800/60 border border-slate-700 text-slate-400 text-sm">
+                            <Link to="/login" className="text-indigo-400 hover:text-indigo-300">Log in</Link> to write a review.
+                        </div>
+                    )}
+
+                    {/* Reviews List */}
+                    {reviews.length === 0 ? (
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-8 text-center">
+                            <p className="text-slate-500">No reviews yet. Be the first to review this product!</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {reviews.map((review) => (
+                                <div key={review._id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                                                {review.customer?.firstName?.[0] || "?"}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-200">
+                                                    {review.customer?.firstName} {review.customer?.lastName}
+                                                </p>
+                                                <div className="flex items-center gap-1">
+                                                    {[1, 2, 3, 4, 5].map((s) => (
+                                                        <svg key={s} className={`w-3.5 h-3.5 ${s <= review.rating ? "text-amber-400" : "text-slate-600"}`} fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs text-slate-500">
+                                            {new Date(review.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-slate-300 mt-2 leading-relaxed">{review.comment}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Recommendations */}

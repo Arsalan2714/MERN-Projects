@@ -166,6 +166,7 @@ exports.loginSendOtp = async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000,
       userId: user._id,
       userType: user.userType,
+      firstName: user.firstName,
     });
 
     res.status(200).json({ message: "OTP sent to your email" });
@@ -203,7 +204,7 @@ exports.loginVerify = async (req, res) => {
     // Clean up
     otpStore.delete(key);
 
-    res.status(200).json({ token, userType: stored.userType });
+    res.status(200).json({ token, userType: stored.userType, firstName: stored.firstName });
   } catch (error) {
     res.status(500).json({ errorMessages: "Verification failed. Please try again." });
   }

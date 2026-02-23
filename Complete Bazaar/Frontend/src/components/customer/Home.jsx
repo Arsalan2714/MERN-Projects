@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const categories = [
     { name: "Electronics", slug: "electronics", icon: "💻", description: "Laptops, phones, gadgets & more", color: "from-blue-500/20 to-indigo-500/20", border: "border-blue-500/30" },
@@ -17,6 +18,8 @@ const features = [
 ];
 
 const Home = () => {
+    const token = useSelector((state) => state.auth.token);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
 
@@ -54,12 +57,14 @@ const Home = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
                         </Link>
-                        <Link
-                            to="/signup"
-                            className="px-8 py-3.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 font-semibold text-lg transition-all duration-300"
-                        >
-                            Create Account
-                        </Link>
+                        {!token && (
+                            <Link
+                                to="/signup"
+                                className="px-8 py-3.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 font-semibold text-lg transition-all duration-300"
+                            >
+                                Create Account
+                            </Link>
+                        )}
                     </div>
                 </div>
             </section>

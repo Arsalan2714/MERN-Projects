@@ -3,13 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/slices/authSlice";
 
-const Login = () => {
+const SellerLogin = () => {
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [step, setStep] = useState(1); // 1 = credentials, 2 = OTP
+    const [step, setStep] = useState(1);
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [error, setError] = useState("");
@@ -75,6 +75,11 @@ const Login = () => {
                 setLoading(false);
                 return;
             }
+            if (data.userType !== "seller") {
+                setError("This login is for seller accounts only. Please use the customer login.");
+                setLoading(false);
+                return;
+            }
             dispatch(login(data));
             navigate("/");
         } catch (err) {
@@ -107,7 +112,7 @@ const Login = () => {
     };
 
     const inputClasses =
-        "w-full px-4 py-2.5 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200";
+        "w-full px-4 py-2.5 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200";
 
     const labelClasses = "block text-sm font-medium text-slate-300 mb-1.5";
 
@@ -116,17 +121,17 @@ const Login = () => {
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4">
-                        <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4">
+                        <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                        {step === 1 ? "Welcome Back" : "Verify Login"}
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                        {step === 1 ? "Seller Login" : "Verify Login"}
                     </h1>
                     <p className="text-slate-400 mt-2">
                         {step === 1
-                            ? "Sign in to your Complete Bazaar account"
+                            ? "Sign in to your Complete Bazaar seller account"
                             : "Enter the OTP sent to your email"}
                     </p>
                 </div>
@@ -134,7 +139,7 @@ const Login = () => {
                 {/* Step Indicator */}
                 <div className="flex items-center justify-center gap-3 mb-6">
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step === 1
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                         : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                         }`}>
                         {step > 1 ? (
@@ -142,19 +147,26 @@ const Login = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         ) : (
-                            <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs">1</span>
+                            <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs">1</span>
                         )}
                         Credentials
                     </div>
                     <div className="w-8 h-px bg-slate-600"></div>
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step === 2
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                         : "bg-slate-700/50 text-slate-500 border border-slate-700"
                         }`}>
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 2 ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-500"
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 2 ? "bg-amber-500 text-white" : "bg-slate-700 text-slate-500"
                             }`}>2</span>
                         Verify
                     </div>
+                </div>
+
+                {/* Seller Badge */}
+                <div className="flex items-center justify-center mb-4">
+                    <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold tracking-wide uppercase">
+                        🏪 Seller Portal
+                    </span>
                 </div>
 
                 {/* Form Card */}
@@ -203,7 +215,7 @@ const Login = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
                                     </span>
-                                    <input type="email" placeholder="you@example.com" ref={emailRef} className={`${inputClasses} pl-10`} />
+                                    <input type="email" placeholder="seller@example.com" ref={emailRef} className={`${inputClasses} pl-10`} />
                                 </div>
                             </div>
 
@@ -211,7 +223,7 @@ const Login = () => {
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <label className="text-sm font-medium text-slate-300">Password</label>
-                                    <Link to="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                                    <Link to="/forgot-password" className="text-xs text-amber-400 hover:text-amber-300 transition-colors">
                                         Forgot password?
                                     </Link>
                                 </div>
@@ -242,7 +254,7 @@ const Login = () => {
                             {/* OTP Step */}
                             <div className="p-3 rounded-lg bg-slate-700/30 border border-slate-700 text-sm">
                                 <span className="text-slate-500">OTP sent to: </span>
-                                <span className="text-indigo-400 font-medium">{email}</span>
+                                <span className="text-amber-400 font-medium">{email}</span>
                             </div>
 
                             <div>
@@ -268,7 +280,7 @@ const Login = () => {
                                 type="button"
                                 onClick={handleResendOtp}
                                 disabled={loading}
-                                className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer disabled:opacity-50"
+                                className="text-sm text-amber-400 hover:text-amber-300 transition-colors cursor-pointer disabled:opacity-50"
                             >
                                 Didn't receive OTP? Resend
                             </button>
@@ -279,7 +291,7 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold text-lg shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold text-lg shadow-lg hover:shadow-amber-500/30 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <span className="flex items-center justify-center gap-2">
@@ -301,23 +313,23 @@ const Login = () => {
                         </div>
                         <div className="relative flex justify-center text-sm">
                             <span className="px-4 bg-slate-800/60 text-slate-400">
-                                Don't have an account?
+                                New to selling?
                             </span>
                         </div>
                     </div>
 
                     {/* Signup Link */}
                     <Link
-                        to="/signup"
-                        className="block w-full text-center py-2.5 px-6 rounded-lg border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 font-medium transition-all duration-200"
+                        to="/seller/signup"
+                        className="block w-full text-center py-2.5 px-6 rounded-lg border border-amber-500/30 text-amber-400 hover:text-amber-300 hover:border-amber-500/50 hover:bg-amber-500/10 font-medium transition-all duration-200"
                     >
-                        Create an account
+                        Create a seller account
                     </Link>
 
-                    {/* Seller Login Link */}
+                    {/* Customer Login Link */}
                     <div className="text-center">
-                        <Link to="/seller/login" className="text-xs text-slate-500 hover:text-amber-400 transition-colors">
-                            Sell on Complete Bazaar? Login as a seller →
+                        <Link to="/login" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                            Looking to shop? Login as a customer →
                         </Link>
                     </div>
                 </form>
@@ -326,4 +338,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SellerLogin;

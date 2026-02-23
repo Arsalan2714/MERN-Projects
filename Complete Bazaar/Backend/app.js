@@ -44,6 +44,19 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
+// Get reviews for a product (public)
+app.get("/api/reviews/:productId", async (req, res) => {
+  try {
+    const Review = require("./models/Review.js");
+    const reviews = await Review.find({ product: req.params.productId })
+      .populate("customer", "firstName lastName")
+      .sort({ createdAt: -1 });
+    res.status(200).json({ reviews });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load reviews" });
+  }
+});
+
 // Protected API routes
 app.use("/api/seller", isLoggedIn,
   isSeller, sellerRouter);
