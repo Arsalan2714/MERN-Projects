@@ -8,8 +8,9 @@ const userSchema = new mongoose.Schema({
   userType: { type: String, required: true, enum: ["customer", "seller"] },
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },
-  cart:[ { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: []}],
-  orders:[ { type: mongoose.Schema.Types.ObjectId, ref: "Order", default: []}],
+  cart: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product", default: [] }],
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product", default: [] }],
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order", default: [] }],
 });
 
 const User = mongoose.model("User", userSchema);

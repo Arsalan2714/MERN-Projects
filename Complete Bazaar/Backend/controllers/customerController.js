@@ -9,7 +9,7 @@ exports.getData = async (req, res, next) => {
         populate: { path: "products" }
     });
     const products = await Product.find();
-    res.status(200).json({ products, cart: user.cart, orders: user.orders });
+    res.status(200).json({ products, cart: user.cart, wishlist: user.wishlist, orders: user.orders });
 }
 
 exports.addToCart = async (req, res, next) => {
@@ -82,4 +82,18 @@ exports.removeOrder = async (req, res, next) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+}
+
+exports.toggleWishlist = async (req, res, next) => {
+    const productId = req.params.id;
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    const index = user.wishlist.indexOf(productId);
+    if (index === -1) {
+        user.wishlist.push(productId);
+    } else {
+        user.wishlist.splice(index, 1);
+    }
+    await user.save();
+    res.status(200).json(user.wishlist);
 }

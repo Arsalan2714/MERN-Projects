@@ -2,15 +2,21 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AddProduct from "./components/seller/AddProduct";
 import EditProduct from "./components/seller/EditProduct";
 import NavBar from "./nav/NavBar";
+import Footer from "./nav/Footer";
+import BackToTop from "./components/common/BackToTop";
 import Signup from "./components/auth/signup";
 import Login from "./components/auth/login";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import { useSelector } from "react-redux";
 import CustomerHome from "./components/customer/CustomerHome";
+import Home from "./components/customer/Home";
 import SellerHome from "./components/seller/SellerHome";
 import Cart from "./components/customer/cart/Cart";
 import Checkout from "./components/customer/checkout/Checkout";
 import Orders from "./components/customer/Orders";
+import ProductDetails from "./components/customer/ProductDetails";
+import Wishlist from "./components/customer/Wishlist";
+import CategoryPage from "./components/customer/CategoryPage";
 
 function App() {
   const { userType } = useSelector((state) => state.auth);
@@ -20,17 +26,22 @@ function App() {
         <div >
           <NavBar />
           <Routes>
-            <Route path="/" element={userType === "seller" ? <SellerHome /> : <CustomerHome />} />
+            <Route path="/" element={userType === "seller" ? <SellerHome /> : <Home />} />
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/edit-product/:id" element={<EditProduct />} />
-            <Route path="/products" element={<div>Products Page</div>} />
+            <Route path="/products" element={<CustomerHome />} />
+            <Route path="/category/:name" element={<CategoryPage />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
           </Routes>
+          <Footer />
+          <BackToTop />
         </div>
       </div>
     </BrowserRouter>

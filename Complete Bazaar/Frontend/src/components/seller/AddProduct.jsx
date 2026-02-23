@@ -18,7 +18,7 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
 
     const formData = new FormData();
     formData.append("name", nameRef.current.value);
@@ -38,9 +38,9 @@ const AddProduct = () => {
         "Authorization": `Bearer ${token}`,
       },
     });
-    if(response.status === 201){
+    if (response.status === 201) {
       navigate("/");
-    }else {
+    } else {
       const data = await response.json();
       console.log(data);
     }
@@ -120,12 +120,12 @@ const AddProduct = () => {
               <label className={labelClasses}>Category</label>
               <select ref={categoryRef} className={inputClasses}>
                 <option value="">Select category</option>
-                <option value="electronics">Electronics</option>
-                <option value="clothing">Clothing</option>
-                <option value="home">Home & Kitchen</option>
-                <option value="books">Books</option>
-                <option value="sports">Sports</option>
-                <option value="other">Other</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Home & Living">Home & Living</option>
+                <option value="Books">Books</option>
+                <option value="Sports">Sports</option>
+                <option value="Beauty">Beauty</option>
               </select>
             </div>
             <div>

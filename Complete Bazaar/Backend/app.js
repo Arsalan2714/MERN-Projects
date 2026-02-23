@@ -31,6 +31,19 @@ app.get("/api/products", async (req, res) => {
   res.status(200).json({ products });
 });
 
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const Product = require("./models/Product.js");
+    const product = await Product.findById(req.params.id).populate("seller", "firstName");
+    if (!product) {
+      return res.status(404).json({ errorMessages: "Product not found" });
+    }
+    res.status(200).json({ product });
+  } catch (error) {
+    res.status(500).json({ errorMessages: "Failed to load product" });
+  }
+});
+
 // Protected API routes
 app.use("/api/seller", isLoggedIn,
   isSeller, sellerRouter);

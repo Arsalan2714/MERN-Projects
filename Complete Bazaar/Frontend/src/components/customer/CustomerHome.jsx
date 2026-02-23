@@ -1,18 +1,40 @@
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { fetchCustomerData, addToCart, removeFromCart } from "../../store/slices/customerSlice";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { fetchCustomerData, addToCart, removeFromCart, toggleWishlist } from "../../store/slices/customerSlice";
 import ErrorMessage from '../common/ErrorMessages'
 import CustomerProduct from "./CustomerProduct";
 
 const CustomerHome = () => {
-    const { products, cart, isLoading, errorMessage } = useSelector(
+    const { products, cart, wishlist, isLoading, errorMessage } = useSelector(
         (state) => state.customer
     );
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const token = useSelector((state) => state.auth.token);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const selectedCategory = searchParams.get("category") || "";
+
+    // Map old DB category names to new display names
+    const categoryAliases = {
+        "Electronics": ["electronics"],
+        "Fashion": ["fashion", "clothing"],
+        "Home & Living": ["home & living", "home"],
+        "Books": ["books"],
+        "Sports": ["sports"],
+        "Beauty": ["beauty", "other"],
+    };
+
+    const filteredProducts = selectedCategory
+        ? products.filter((p) => {
+            const cat = p.category.toLowerCase();
+            const selected = selectedCategory.toLowerCase();
+            if (cat === selected) return true;
+            const aliases = categoryAliases[selectedCategory] || [];
+            return aliases.includes(cat);
+        })
+        : products;
 
     useEffect(() => {
         dispatch(fetchCustomerData());
@@ -29,6 +51,14 @@ const CustomerHome = () => {
 
     const handleRemoveFromCart = (productId) => {
         dispatch(removeFromCart(productId));
+    };
+
+    const handleToggleWishlist = (productId) => {
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+        dispatch(toggleWishlist(productId));
     };
 
     // Loading State
@@ -92,18 +122,29 @@ const CustomerHome = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                            Browse Products
+                            {selectedCategory ? selectedCategory : "Browse Products"}
                         </h1>
                         <ErrorMessage errorMessage={errorMessage} />
                         <p className="text-slate-400 mt-1">
-                            {products.length}{" "}
-                            {products.length === 1 ? "product" : "products"} available
+                            {filteredProducts.length}{" "}
+                            {filteredProducts.length === 1 ? "product" : "products"} available
                         </p>
                     </div>
+                    {selectedCategory && (
+                        <button
+                            onClick={() => setSearchParams({})}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 text-sm font-medium transition-all duration-200 cursor-pointer"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Filter
+                        </button>
+                    )}
                 </div>
 
                 {/* Empty State */}
-                {products && products.length === 0 ? (
+                {filteredProducts && filteredProducts.length === 0 ? (
                     <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-2xl p-12 text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/50 border border-slate-600 mb-5">
                             <svg
@@ -121,17 +162,54 @@ const CustomerHome = () => {
                             </svg>
                         </div>
                         <h2 className="text-xl font-semibold text-slate-200 mb-2">
-                            No products available
+                            {selectedCategory ? `No products in "${selectedCategory}"` : "No products available"}
                         </h2>
                         <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-                            Check back later for new products from our sellers.
+                            {selectedCategory ? "Try a different category or browse all products." : "Check back later for new products from our sellers."}
                         </p>
+                        {selectedCategory && (
+                            <button
+                                onClick={() => setSearchParams({})}
+                                className="px-6 py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-medium transition-colors cursor-pointer"
+                            >
+                                Browse All Products
+                            </button>
+                        )}
+                    </div>
+                ) : selectedCategory ? (
+                    /* Filtered: flat grid */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredProducts.map((product) => (
+                            <CustomerProduct key={product._id} product={product} cart={cart} wishlist={wishlist} handleAddToCart={handleAddToCart} handleRemoveFromCart={handleRemoveFromCart} handleToggleWishlist={handleToggleWishlist} />
+                        ))}
                     </div>
                 ) : (
-                    /* Product Grid */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {products.map((product) => (
-                            <CustomerProduct key={product._id} product={product} cart={cart} handleAddToCart={handleAddToCart} handleRemoveFromCart={handleRemoveFromCart} />
+                    /* No filter: group by category */
+                    <div className="space-y-12">
+                        {Object.entries(
+                            filteredProducts.reduce((acc, product) => {
+                                const cat = product.category || "Uncategorized";
+                                if (!acc[cat]) acc[cat] = [];
+                                acc[cat].push(product);
+                                return acc;
+                            }, {})
+                        ).map(([category, items]) => (
+                            <div key={category}>
+                                <div className="flex items-center justify-between mb-5">
+                                    <h2 className="text-xl font-bold text-slate-100">{category}</h2>
+                                    <button
+                                        onClick={() => setSearchParams({ category })}
+                                        className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors cursor-pointer"
+                                    >
+                                        View all →
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {items.map((product) => (
+                                        <CustomerProduct key={product._id} product={product} cart={cart} wishlist={wishlist} handleAddToCart={handleAddToCart} handleRemoveFromCart={handleRemoveFromCart} handleToggleWishlist={handleToggleWishlist} />
+                                    ))}
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}

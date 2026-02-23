@@ -34,7 +34,8 @@ const CartItems = ({ item, handleIncrease, handleDecrease }) => {
                 </span>
                 <button
                     onClick={() => handleIncrease(item._id)}
-                    className="w-8 h-8 rounded-lg border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all duration-200 cursor-pointer flex items-center justify-center text-lg font-bold"
+                    disabled={item.quantity >= item.stock}
+                    className="w-8 h-8 rounded-lg border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all duration-200 cursor-pointer flex items-center justify-center text-lg font-bold disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-600 disabled:hover:bg-transparent disabled:hover:text-slate-300"
                 >
                     +
                 </button>

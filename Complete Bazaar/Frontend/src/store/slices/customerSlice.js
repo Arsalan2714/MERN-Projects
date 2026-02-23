@@ -4,6 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState = {
   products: [],
   cart: [],
+  wishlist: [],
   orders: [],
   isLoading: false,
   errorMessage: [],
@@ -19,7 +20,7 @@ const fetchCustomerData = createAsyncThunk(
       const response = await fetch("http://localhost:3001/api/products");
       const body = await response.json();
       if (response.status === 200) {
-        return { products: body.products, cart: [], orders: [] };
+        return { products: body.products, cart: [], wishlist: [], orders: [] };
       } else {
         throw new Error("Failed to load products");
       }
@@ -141,6 +142,26 @@ export const removeOrder = createAsyncThunk(
   }
 );
 
+export const toggleWishlist = createAsyncThunk(
+  "customer/toggleWishlist",
+  async (productId) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:3001/api/customer/wishlist/${productId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const body = await response.json();
+    if (response.status === 200) {
+      return body;
+    } else {
+      throw new Error(body.error);
+    }
+  }
+);
+
 const customerSlice = createSlice({
   name: "customer",
   initialState,
@@ -151,9 +172,10 @@ const customerSlice = createSlice({
     });
     builder.addCase(fetchCustomerData.fulfilled, (state, action) => {
       state.isLoading = false;
-      const { products, cart, orders } = action.payload;
+      const { products, cart, wishlist, orders } = action.payload;
       state.products = products;
       state.cart = cart;
+      state.wishlist = wishlist || [];
       state.orders = orders;
     });
     builder.addCase(fetchCustomerData.rejected, (state, action) => {
@@ -178,6 +200,12 @@ const customerSlice = createSlice({
       state.errorMessage = [action.error.message];
     });
     builder.addCase(placeOrder.rejected, (state, action) => {
+      state.errorMessage = [action.error.message];
+    });
+    builder.addCase(toggleWishlist.fulfilled, (state, action) => {
+      state.wishlist = action.payload;
+    });
+    builder.addCase(toggleWishlist.rejected, (state, action) => {
       state.errorMessage = [action.error.message];
     });
   },

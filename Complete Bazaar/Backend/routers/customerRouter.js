@@ -8,6 +8,7 @@ customerRouter.delete("/cart/:id", customerController.removeFromCart);
 customerRouter.post("/order", customerController.createOrder);
 customerRouter.delete("/order/:id", customerController.cancelOrder);
 customerRouter.patch("/order/:id", customerController.removeOrder);
+customerRouter.post("/wishlist/:id", customerController.toggleWishlist);
 
 
 
