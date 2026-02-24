@@ -15,6 +15,7 @@ const CustomerHome = () => {
     const token = useSelector((state) => state.auth.token);
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedCategory = searchParams.get("category") || "";
+    const searchQuery = searchParams.get("search") || "";
 
     // Map old DB category names to new display names
     const categoryAliases = {
@@ -26,7 +27,7 @@ const CustomerHome = () => {
         "Beauty": ["beauty", "other"],
     };
 
-    const filteredProducts = selectedCategory
+    const categoryFiltered = selectedCategory
         ? products.filter((p) => {
             const cat = p.category.toLowerCase();
             const selected = selectedCategory.toLowerCase();
@@ -35,6 +36,18 @@ const CustomerHome = () => {
             return aliases.includes(cat);
         })
         : products;
+
+    const filteredProducts = searchQuery
+        ? categoryFiltered.filter((p) => {
+            const q = searchQuery.toLowerCase();
+            return (
+                p.name?.toLowerCase().includes(q) ||
+                p.description?.toLowerCase().includes(q) ||
+                p.category?.toLowerCase().includes(q) ||
+                p.brand?.toLowerCase().includes(q)
+            );
+        })
+        : categoryFiltered;
 
     useEffect(() => {
         dispatch(fetchCustomerData());
@@ -122,15 +135,19 @@ const CustomerHome = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                            {selectedCategory ? selectedCategory : "Browse Products"}
+                            {searchQuery
+                                ? `Results for "${searchQuery}"`
+                                : selectedCategory
+                                    ? selectedCategory
+                                    : "Browse Products"}
                         </h1>
                         <ErrorMessage errorMessage={errorMessage} />
                         <p className="text-slate-400 mt-1">
                             {filteredProducts.length}{" "}
-                            {filteredProducts.length === 1 ? "product" : "products"} available
+                            {filteredProducts.length === 1 ? "product" : "products"} found
                         </p>
                     </div>
-                    {selectedCategory && (
+                    {(selectedCategory || searchQuery) && (
                         <button
                             onClick={() => setSearchParams({})}
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 text-sm font-medium transition-all duration-200 cursor-pointer"
@@ -138,7 +155,7 @@ const CustomerHome = () => {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Clear Filter
+                            Clear
                         </button>
                     )}
                 </div>

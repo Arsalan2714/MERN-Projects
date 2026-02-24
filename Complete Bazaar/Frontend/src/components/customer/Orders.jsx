@@ -169,10 +169,10 @@ const Orders = () => {
                                         {uniqueProducts.map((product) => (
                                             <div
                                                 key={product._id}
-                                                className="flex items-center gap-4 p-3 rounded-xl bg-slate-700/30 border border-slate-700/50"
+                                                className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-700/50"
                                             >
                                                 {/* Product Image */}
-                                                <div className="w-16 h-16 bg-slate-700/50 rounded-lg overflow-hidden flex-shrink-0">
+                                                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-700/50 rounded-lg overflow-hidden flex-shrink-0">
                                                     <img
                                                         src={`http://localhost:3001/${product.imageUrl}`}
                                                         alt={product.name}
@@ -190,23 +190,23 @@ const Orders = () => {
                                                     </p>
                                                 </div>
 
-                                                {/* Quantity */}
-                                                {product.quantity > 1 && (
-                                                    <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                                        ×{product.quantity}
-                                                    </span>
-                                                )}
-
-                                                {/* Price */}
-                                                <div className="text-right flex-shrink-0">
-                                                    <p className="text-sm font-bold text-indigo-400">
-                                                        ₹{(product.price * product.quantity).toFixed(2)}
-                                                    </p>
+                                                {/* Quantity + Price */}
+                                                <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
                                                     {product.quantity > 1 && (
-                                                        <p className="text-xs text-slate-500">
-                                                            ₹{product.price.toFixed(2)} each
-                                                        </p>
+                                                        <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                                            ×{product.quantity}
+                                                        </span>
                                                     )}
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-bold text-indigo-400">
+                                                            ₹{(product.price * product.quantity).toFixed(2)}
+                                                        </p>
+                                                        {product.quantity > 1 && (
+                                                            <p className="text-xs text-slate-500">
+                                                                ₹{product.price.toFixed(2)} each
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
