@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setProducts, deleteProductLocal } from "../store/slices/adminSlice";
 import AdminLayout from "../components/AdminLayout";
+import API_URL from "../config";
 
 const ProductsPage = () => {
     const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const ProductsPage = () => {
     const fetchProducts = async (p = page, q = search) => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/products?page=${p}&limit=15&search=${q}`, {
+            const res = await fetch(`${API_URL}/api/admin/products?page=${p}&limit=15&search=${q}`, {
                 headers: { Authorization: `Bearer ${adminToken}` },
             });
             const data = await res.json();
@@ -32,7 +33,7 @@ const ProductsPage = () => {
         if (!window.confirm("Delete this product? This cannot be undone.")) return;
         setDeleteId(id);
         try {
-            await fetch(`http://localhost:3001/api/admin/products/${id}`, {
+            await fetch(`${API_URL}/api/admin/products/${id}`, {
                 method: "DELETE", headers: { Authorization: `Bearer ${adminToken}` },
             });
             dispatch(deleteProductLocal(id));
@@ -70,7 +71,7 @@ const ProductsPage = () => {
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-lg bg-slate-700/60 overflow-hidden flex-shrink-0">
-                                                    <img src={`http://localhost:3001/${p.imageUrl}`} alt={p.name} className="w-full h-full object-contain" />
+                                                    <img src={`${API_URL}/${p.imageUrl}`} alt={p.name} className="w-full h-full object-contain" />
                                                 </div>
                                                 <div>
                                                     <p className="text-slate-200 font-medium line-clamp-1 max-w-[160px]">{p.name}</p>

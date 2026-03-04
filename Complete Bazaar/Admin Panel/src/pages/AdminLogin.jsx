@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../store/slices/adminSlice";
+import API_URL from "../config";
 
 const AdminLogin = () => {
     const dispatch = useDispatch();
@@ -17,7 +18,7 @@ const AdminLogin = () => {
         setError("");
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:3001/api/admin/login", {
+            const res = await fetch(`${API_URL}/api/admin/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),

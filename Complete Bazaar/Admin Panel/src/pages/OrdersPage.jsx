@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setOrders, updateOrderStatus } from "../store/slices/adminSlice";
 import AdminLayout from "../components/AdminLayout";
+import API_URL from "../config";
 
 const statuses = ["Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"];
 const statusColors = {
@@ -24,7 +25,7 @@ const OrdersPage = () => {
     const fetchOrders = async (p = page, f = statusFilter) => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/orders?page=${p}&limit=15&status=${f}`, {
+            const res = await fetch(`${API_URL}/api/admin/orders?page=${p}&limit=15&status=${f}`, {
                 headers: { Authorization: `Bearer ${adminToken}` },
             });
             const data = await res.json();
@@ -38,7 +39,7 @@ const OrdersPage = () => {
     const handleStatusChange = async (orderId, newStatus) => {
         setUpdatingId(orderId);
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/orders/${orderId}/status`, {
+            const res = await fetch(`${API_URL}/api/admin/orders/${orderId}/status`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
                 body: JSON.stringify({ status: newStatus }),

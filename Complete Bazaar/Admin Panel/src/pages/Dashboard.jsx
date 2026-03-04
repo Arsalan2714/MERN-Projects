@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStats } from "../store/slices/adminSlice";
 import AdminLayout from "../components/AdminLayout";
+import API_URL from "../config";
 
 const statusColors = {
     Confirmed: "bg-indigo-500", Processing: "bg-amber-500",
@@ -34,7 +35,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch("http://localhost:3001/api/admin/stats", {
+                const res = await fetch(`${API_URL}/api/admin/stats`, {
                     headers: { Authorization: `Bearer ${adminToken}` },
                 });
                 const data = await res.json();

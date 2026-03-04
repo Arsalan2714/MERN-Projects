@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUsers, deleteUserLocal } from "../store/slices/adminSlice";
 import AdminLayout from "../components/AdminLayout";
+import API_URL from "../config";
 
 /* ── Edit User Modal ─────────────────────────────────────────── */
 const EditModal = ({ user, adminToken, onClose, onSaved }) => {
@@ -142,7 +143,7 @@ const UsersPage = () => {
     const fetchUsers = async (p = page, q = search) => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/users?page=${p}&limit=15&search=${q}`, {
+            const res = await fetch(`${API_URL}/api/admin/users?page=${p}&limit=15&search=${q}`, {
                 headers: { Authorization: `Bearer ${adminToken}` },
             });
             const data = await res.json();
@@ -159,7 +160,7 @@ const UsersPage = () => {
         if (!window.confirm("Delete this user? This cannot be undone.")) return;
         setDeleteId(id);
         try {
-            await fetch(`http://localhost:3001/api/admin/users/${id}`, {
+            await fetch(`${API_URL}/api/admin/users/${id}`, {
                 method: "DELETE", headers: { Authorization: `Bearer ${adminToken}` },
             });
             dispatch(deleteUserLocal(id));
