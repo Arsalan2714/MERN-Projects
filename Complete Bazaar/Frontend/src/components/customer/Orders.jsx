@@ -366,7 +366,7 @@ const Orders = () => {
                                         </button>
 
                                         {/* Cancel / Remove */}
-                                        {!isCancelled ? (
+                                        {order.status === "Confirmed" && (
                                             <button
                                                 onClick={() => handleCancelOrder(order._id)}
                                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-200 text-sm font-medium cursor-pointer"
@@ -376,7 +376,8 @@ const Orders = () => {
                                                 </svg>
                                                 Cancel Order
                                             </button>
-                                        ) : (
+                                        )}
+                                        {isCancelled && (
                                             <button
                                                 onClick={() => handleRemoveOrder(order._id)}
                                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-200 text-sm font-medium cursor-pointer"

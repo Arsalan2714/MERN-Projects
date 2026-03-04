@@ -119,6 +119,26 @@ adminRouter.delete("/users/:id", isAdmin, async (req, res) => {
     }
 });
 
+// ─── PATCH /api/admin/users/:id ──────────────────────────────────────────────
+adminRouter.patch("/users/:id", isAdmin, async (req, res) => {
+    try {
+        const { firstName, lastName, email, phone, userType } = req.body;
+        const updates = {};
+        if (firstName !== undefined) updates.firstName = firstName.trim();
+        if (lastName !== undefined) updates.lastName = lastName.trim();
+        if (email !== undefined) updates.email = email.trim().toLowerCase();
+        if (phone !== undefined) updates.phone = phone.trim();
+        if (userType !== undefined && ["customer", "seller"].includes(userType)) updates.userType = userType;
+        updates.updatedAt = new Date();
+
+        const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, select: "-password -cart -wishlist -addresses" });
+        if (!user) return res.status(404).json({ error: "User not found" });
+        res.status(200).json({ user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ─── GET /api/admin/products ─────────────────────────────────────────────────
 adminRouter.get("/products", isAdmin, async (req, res) => {
     try {
