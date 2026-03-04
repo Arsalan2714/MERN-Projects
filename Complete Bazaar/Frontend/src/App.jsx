@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AddProduct from "./components/seller/AddProduct";
 import EditProduct from "./components/seller/EditProduct";
 import NavBar from "./nav/NavBar";
@@ -29,7 +29,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-100">
-        <div >
+        <div>
           <NavBar />
           <Routes>
             <Route path="/" element={userType === "seller" ? <SellerHome /> : <Home />} />

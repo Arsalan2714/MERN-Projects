@@ -9,7 +9,7 @@ const store = configureStore({
         seller: sellerReducer,
         customer: customerReducer,
     },
-    
+
 });
 
 export default store;
