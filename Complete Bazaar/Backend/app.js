@@ -13,6 +13,7 @@ const sellerRouter = require("./routers/sellerRouter.js");
 const customerRouter = require("./routers/customerRouter.js");
 const authRouter = require("./routers/authRouter.js");
 const { isLoggedIn, isSeller, isCustomer } = require("./middleware/auth.js");
+const paymentRouter = require("./routers/paymentRouter.js");
 
 const MONGO_DB_URL = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@airbnb.zr7xw53.mongodb.net/${process.env.MONGO_DB_DATABASE}`;
 
@@ -63,6 +64,7 @@ app.use("/api/seller", isLoggedIn,
 app.use("/api/customer", isLoggedIn,
   isCustomer, customerRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/payment", paymentRouter);
 
 // 404 handler
 app.use(errorController.get404);

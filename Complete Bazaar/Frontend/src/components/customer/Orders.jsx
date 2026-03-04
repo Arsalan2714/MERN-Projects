@@ -2,6 +2,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchCustomerData, cancelOrder, removeOrder } from "../../store/slices/customerSlice";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Orders = () => {
     const { orders, isLoading } = useSelector((state) => state.customer);
@@ -17,6 +19,119 @@ const Orders = () => {
 
     const handleRemoveOrder = (orderId) => {
         dispatch(removeOrder(orderId));
+    };
+
+    const handleDownloadInvoice = (order, orderNumber, uniqueProducts) => {
+        const doc = new jsPDF();
+        const pageW = doc.internal.pageSize.getWidth();
+
+        // ── Header banner ──
+        doc.setFillColor(79, 70, 229); // indigo-600
+        doc.rect(0, 0, pageW, 28, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.text("Complete Bazaar", 14, 12);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Your one-stop online marketplace", 14, 20);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("TAX INVOICE", pageW - 14, 16, { align: "right" });
+
+        // ── Invoice meta ──
+        doc.setTextColor(30, 41, 59); // slate-800
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const metaY = 36;
+        doc.text(`Invoice No: INV-${orderNumber.toString().padStart(4, "0")}`, 14, metaY);
+        doc.text(`Date: ${formatDate(order.createdAt)}`, 14, metaY + 6);
+        doc.text(`Payment: ${order.paymentMethod === "Online" ? "Online (Razorpay)" : "Cash on Delivery"}`, 14, metaY + 12);
+        doc.text(`Status: ${order.status || "Confirmed"}`, 14, metaY + 18);
+
+        // ── Shipping address ──
+        if (order.shippingAddress) {
+            const a = order.shippingAddress;
+            const addrX = pageW / 2 + 10;
+            doc.setFont("helvetica", "bold");
+            doc.text("Deliver To:", addrX, metaY);
+            doc.setFont("helvetica", "normal");
+            doc.text(a.fullName || "", addrX, metaY + 6);
+            doc.text(a.addressLine1 || "", addrX, metaY + 12);
+            if (a.addressLine2) doc.text(a.addressLine2, addrX, metaY + 18);
+            doc.text(`${a.city || ""}, ${a.state || ""} - ${a.pincode || ""}`, addrX, metaY + (a.addressLine2 ? 24 : 18));
+            doc.text(`Phone: ${a.phone || ""}`, addrX, metaY + (a.addressLine2 ? 30 : 24));
+        }
+
+        // ── Divider ──
+        doc.setDrawColor(199, 210, 254); // indigo-200
+        doc.line(14, 66, pageW - 14, 66);
+
+        // ── Items table ──
+        const rows = uniqueProducts.map((p, i) => [
+            i + 1,
+            p.name,
+            p.brand || "-",
+            p.quantity,
+            `Rs. ${p.price.toFixed(2)}`,
+            `Rs. ${(p.price * p.quantity).toFixed(2)}`,
+        ]);
+
+        autoTable(doc, {
+            startY: 70,
+            head: [["#", "Product", "Brand", "Qty", "Unit Price", "Total"]],
+            body: rows,
+            theme: "grid",
+            headStyles: { fillColor: [79, 70, 229], textColor: 255, fontSize: 8, fontStyle: "bold" },
+            bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [238, 242, 255] }, // indigo-50
+            columnStyles: {
+                0: { cellWidth: 8 },
+                1: { cellWidth: 60 },
+                2: { cellWidth: 30 },
+                3: { cellWidth: 12, halign: "center" },
+                4: { cellWidth: 28, halign: "right" },
+                5: { cellWidth: 28, halign: "right" },
+            },
+            margin: { left: 14, right: 14 },
+        });
+
+        // ── Totals ──
+        const finalY = doc.lastAutoTable.finalY + 6;
+        const subtotal = uniqueProducts.reduce((s, p) => s + p.price * p.quantity, 0);
+        const shipping = subtotal >= 500 ? 0 : 100;
+        const gst = subtotal * 0.18;
+
+        const totalsX = pageW - 80;
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.text("Subtotal:", totalsX, finalY);
+        doc.text(`Rs. ${subtotal.toFixed(2)}`, pageW - 14, finalY, { align: "right" });
+        doc.text("Shipping:", totalsX, finalY + 6);
+        doc.text(shipping === 0 ? "Free" : `Rs. ${shipping.toFixed(2)}`, pageW - 14, finalY + 6, { align: "right" });
+        doc.text("GST (18%):", totalsX, finalY + 12);
+        doc.text(`Rs. ${gst.toFixed(2)}`, pageW - 14, finalY + 12, { align: "right" });
+
+        // Grand total box
+        doc.setFillColor(79, 70, 229);
+        doc.roundedRect(totalsX - 4, finalY + 17, pageW - totalsX - 10, 10, 2, 2, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.text("Grand Total:", totalsX, finalY + 23.5);
+        doc.text(`Rs. ${order.totalAmount.toFixed(2)}`, pageW - 14, finalY + 23.5, { align: "right" });
+
+        // ── Footer ──
+        const footerY = doc.internal.pageSize.getHeight() - 14;
+        doc.setDrawColor(199, 210, 254);
+        doc.line(14, footerY - 4, pageW - 14, footerY - 4);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.text("Thank you for shopping with Complete Bazaar!", pageW / 2, footerY, { align: "center" });
+        doc.text("This is a computer-generated invoice and does not require a signature.", pageW / 2, footerY + 5, { align: "center" });
+
+        doc.save(`CompleteBazaar_Invoice_${orderNumber}.pdf`);
     };
 
     // Loading State
@@ -237,8 +352,20 @@ const Orders = () => {
                                         </div>
                                     )}
 
-                                    {/* Cancel / Remove Buttons */}
-                                    <div className="mt-4 flex justify-end">
+                                    {/* Actions: Download Invoice + Cancel/Remove */}
+                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                        {/* Download Invoice */}
+                                        <button
+                                            onClick={() => handleDownloadInvoice(order, orders.length - index, uniqueProducts)}
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/10 hover:border-indigo-500/70 transition-all duration-200 text-sm font-medium cursor-pointer"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Download Invoice
+                                        </button>
+
+                                        {/* Cancel / Remove */}
                                         {!isCancelled ? (
                                             <button
                                                 onClick={() => handleCancelOrder(order._id)}

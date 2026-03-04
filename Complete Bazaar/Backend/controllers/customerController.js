@@ -48,7 +48,7 @@ exports.removeFromCart = async (req, res, next) => {
 exports.createOrder = async (req, res, next) => {
     try {
         const userId = req.userId;
-        const { paymentMethod, shippingAddress } = req.body;
+        const { paymentMethod, shippingAddress, totalAmount: bodyTotal } = req.body;
         const user = await User.findById(userId).populate("cart");
 
         // Check stock for all cart items before placing order
@@ -64,7 +64,9 @@ exports.createOrder = async (req, res, next) => {
             }
         }
 
-        const totalAmount = user.cart.reduce((sum, product) => sum + product.price, 0);
+        // Use the amount passed from Razorpay verify (includes shipping+GST), or fall back to cart sum for COD
+        const cartSum = user.cart.reduce((sum, product) => sum + product.price, 0);
+        const totalAmount = bodyTotal ? parseFloat(bodyTotal) : cartSum;
 
         const order = new Order({
             customer: userId,
